@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -16,6 +15,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.android.synthetic.main.activity_map.*
 import java.util.*
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -25,8 +25,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
     var rejectedPermissionList = ArrayList<String>()
+
     private lateinit var mMap: GoogleMap
     private lateinit var locationManager:LocationManager
+    private lateinit var location:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +36,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
     }
 
     override fun onMapReady(gMap: GoogleMap) {
@@ -43,6 +44,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         settingPermission()
         refreshMap()
+        UIIntraction()
     }
 
     fun settingPermission(){
@@ -90,7 +92,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun getLocation() : String {
-        var location: Location? = null
+        var temp: Location? = null
         var bestLocation: Location? = null
         val providers: List<String> = locationManager.getProviders(true)
 
@@ -101,19 +103,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             if(isGPSEnabled) {
                 for (provider in providers) {
-                    location = locationManager.getLastKnownLocation(provider)
-                    if (location == null)
+                    temp = locationManager.getLastKnownLocation(provider)
+                    if (temp == null)
                         continue
-                    if (bestLocation == null || location.accuracy < bestLocation.accuracy) {
-                        bestLocation = location;
+                    if (bestLocation == null || temp.accuracy < bestLocation.accuracy) {
+                        bestLocation = temp;
                     }
                 }
             }
             else if(isNetworkEnabled)
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)!!
+                temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)!!
         }
 
-        val locationtext:String = location!!.latitude.toString()+"@"+location!!.longitude.toString()
-        return locationtext
+        location= temp!!.latitude.toString()+"@"+temp!!.longitude.toString()
+        return location
+    }
+
+    fun UIIntraction(){
+        btn_add.setOnClickListener {
+            //여기서 AlertDialogView로 만들어서 값 받아와서 db에 저장~
+        }
     }
 }
