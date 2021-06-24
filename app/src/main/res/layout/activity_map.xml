@@ -4,24 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapActivity">
+    tools:context=".MapActivity"
+    android:id="@+id/map_layout">
 
+
+    <LinearLayout
+        android:id="@+id/map_search_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/map_search_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="주소 입력"/>
+
+        <Button
+            android:id="@+id/map_search_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="검색"
+            android:layout_margin="2dp"/>
+    </LinearLayout>
 
     <fragment
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:id="@+id/google_map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        app:layout_constraintTop_toBottomOf="@+id/map_search_layout"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <ImageView
-        android:id="@+id/btn_add"
+        android:id="@+id/btn_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/btn_add"
+        app:srcCompat="@drawable/btn_refresh"
         android:background="@drawable/background_btn_add"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="10dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="30dp"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
