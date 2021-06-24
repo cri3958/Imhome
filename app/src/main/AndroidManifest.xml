@@ -11,15 +11,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        >
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
-        <activity android:name=".MapActivity"></activity>
+        <activity android:name=".MapActivity"
+            android:screenOrientation="portrait"></activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAWLQp0oFir9FZgr7UAw48I0IdxDgn3lVw" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

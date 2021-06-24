@@ -3,9 +3,13 @@ package com.hojin.imhome
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -14,11 +18,12 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_map.*
 import java.util.*
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private val multiplePermissionsCode = 100
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -42,6 +47,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap=gMap
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mMap.setOnMarkerClickListener(this)
         settingPermission()
         refreshMap()
         UIIntraction()
@@ -120,8 +126,39 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun UIIntraction(){
-        btn_add.setOnClickListener {
-            //여기서 AlertDialogView로 만들어서 값 받아와서 db에 저장~
+        btn_refresh.setOnClickListener { refreshMap() }
+        //키보드 닫기 함수 필요
+        map_search_btn.setOnClickListener {//검색버튼
+            val geocoder = Geocoder(this)
+            val addressname = map_search_text.text.toString()
+            if(addressname.isEmpty()){
+                Toast.makeText(applicationContext,"장소를 입력한 후 검색을 눌러주세요!",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val addressList = geocoder.getFromLocationName(addressname,5)
+            if(addressList.isEmpty()){
+                Toast.makeText(applicationContext,"장소를 다시 입력한 후 검색을 눌러주세요!",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            //문제없음
+            val temp = addressList[0].toString().split(",")
+            Log.d("@@@@@",temp.toString())
+            val address_latitude = temp[10].split("=")[1].toDouble()
+            val address_longitude = temp[12].split("=")[1].toDouble()
+
+            val position = LatLng(address_latitude,address_longitude)
+            val markerOptions = MarkerOptions()
+
+            markerOptions.position(position)
+
+            mMap.addMarker(markerOptions)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
         }
     }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        Toast.makeText(this,"123",Toast.LENGTH_SHORT).show()
+        return true
+    }
 }
+
