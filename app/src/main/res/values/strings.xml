@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Imhome</string>
+
+    <string name="dialog_area_name">이름 :\t</string>
+    <string name="dialog_area_address">주소 :\t</string>
+    <string name="dialog_area_latitude">위도 :\t</string>
+    <string name="dialog_area_longitude">경도 :\t</string>
+    <string name="dialog_area_radius">반경 :\t</string>
 </resources>
