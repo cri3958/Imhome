@@ -1,4 +1,4 @@
-package com.hojin.imhome
+package com.hojin.imhome.map
 
 import android.Manifest
 import android.content.Context
@@ -8,8 +8,9 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
-import android.view.inputmethod.InputMethodManager
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,7 +21,10 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.hojin.imhome.R
+import com.hojin.imhome.util.util
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.dialog_add_area.view.*
 import java.util.*
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -34,6 +38,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private lateinit var mMap: GoogleMap
     private lateinit var locationManager:LocationManager
     private lateinit var location:String
+
+    private lateinit var mname:String
+    private var mlatitude:Double = 0.0
+    private var mlongitude:Double = 0.0
+
+    val util:util = util()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,15 +93,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     fun refreshMap(){
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val mylocation = getLocation()
-        val mlatitude = mylocation.split("@")[0].toDouble()
-        val mlongitude = mylocation.split("@")[1].toDouble()
 
+        mname = mylocation.split("@")[0]
+        mlatitude = mylocation.split("@")[1].toDouble()
+        mlongitude = mylocation.split("@")[2].toDouble()
 
         val position = LatLng(mlatitude,mlongitude)
 
         val markerOptions = MarkerOptions()
         markerOptions.position(position)
-            .title("현위치")
 
         mMap.addMarker(markerOptions)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
@@ -115,19 +125,23 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                     if (bestLocation == null || temp.accuracy < bestLocation.accuracy) {
                         bestLocation = temp;
                     }
+                    temp = bestLocation
                 }
             }
             else if(isNetworkEnabled)
                 temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)!!
-        }
+            val latitude = temp!!.latitude
+            val longitude = temp.longitude
+            val address = Geocoder(this, Locale.getDefault()).getFromLocation(latitude,longitude,1).toString().split("\u0022")[1]
+            Log.d("@@@@",address)
 
-        location= temp!!.latitude.toString()+"@"+temp!!.longitude.toString()
+            location= "${address}@${latitude}@${longitude}"
+        }
         return location
     }
 
     fun UIIntraction(){
         btn_refresh.setOnClickListener { refreshMap() }
-        //키보드 닫기 함수 필요
         map_search_btn.setOnClickListener {//검색버튼
             val geocoder = Geocoder(this)
             val addressname = map_search_text.text.toString()
@@ -140,24 +154,57 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 Toast.makeText(applicationContext,"장소를 다시 입력한 후 검색을 눌러주세요!",Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            //문제없음
             val temp = addressList[0].toString().split(",")
-            Log.d("@@@@@",temp.toString())
-            val address_latitude = temp[10].split("=")[1].toDouble()
-            val address_longitude = temp[12].split("=")[1].toDouble()
+            mname = temp[0].split("\u0022")[1]
+            mlatitude = temp[10].split("=")[1].toDouble()
+            mlongitude = temp[12].split("=")[1].toDouble()
 
-            val position = LatLng(address_latitude,address_longitude)
+            val position = LatLng(mlatitude,mlongitude)
             val markerOptions = MarkerOptions()
 
             markerOptions.position(position)
 
             mMap.addMarker(markerOptions)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
+
+            util.keyboard_down(applicationContext,map_search_text)
+            map_search_text.text=null
         }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        Toast.makeText(this,"123",Toast.LENGTH_SHORT).show()
+        val dialogview: View = layoutInflater.inflate(R.layout.dialog_add_area,null)
+
+        dialogview.map_dialog_address.setText(mname)
+        dialogview.map_dialog_latitude.setText(mlatitude.toString())
+        dialogview.map_dialog_longitude.setText(mlongitude.toString())
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("새로운 지역을 만드시겠습니까?")
+            .setView(dialogview)
+            .setPositiveButton("네",null)
+            .setNegativeButton("아니오",null)
+            .setCancelable(false)
+
+        val dialog = builder.create()
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if(dialogview.map_dialog_name.text.isNullOrEmpty() ||dialogview.map_dialog_address.text.isNullOrEmpty() ||dialogview.map_dialog_latitude.text.isNullOrEmpty() ||dialogview.map_dialog_longitude.text.isNullOrEmpty()){
+                Toast.makeText(applicationContext,"내용을 전부 입력해주세요.",Toast.LENGTH_SHORT).show()
+            }else if(dialogview.map_dialog_longitude.text.toString().toDouble()>180||dialogview.map_dialog_longitude.text.toString().toDouble()<-180){
+                Toast.makeText(applicationContext,"경도에는 -180 ~ 180의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
+            } else if(dialogview.map_dialog_latitude.text.toString().toDouble()>90||dialogview.map_dialog_latitude.text.toString().toDouble()<-90){
+                Toast.makeText(applicationContext,"위도에는 -90 ~ 90의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
+            } else if(dialogview.map_dialog_radius.text.toString().toInt()>5000||dialogview.map_dialog_radius.text.toString().toDouble()<0){
+                Toast.makeText(applicationContext,"반경에는 0 ~ 5000의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
+            } else{
+                Toast.makeText(applicationContext,"add!",Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+                //db에 저장하기
+            }
+        }
+
+
         return true
     }
 }
