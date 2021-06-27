@@ -31,7 +31,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private val multiplePermissionsCode = 100
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
     var rejectedPermissionList = ArrayList<String>()
 
@@ -51,6 +52,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        settingPermission()
     }
 
     override fun onMapReady(gMap: GoogleMap) {
@@ -58,14 +60,21 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         mMap.setOnMarkerClickListener(this)
-        settingPermission()
-        refreshMap()
-        UIIntraction()
+        if(settingPermission()){
+            refreshMap()
+            UIIntraction()
+        }
     }
 
-    fun settingPermission(){
-        checkPermissions()
-        requestPermissions()
+    private fun settingPermission():Boolean{
+        return if(checkPermissions())
+            true
+        else {
+            if (requestPermissions())
+                true
+            else
+                settingPermission()
+        }
     }
 
     private fun checkPermissions():Boolean {//https://m.blog.naver.com/PostView.naver?blogId=chandong83&logNo=221616557088&proxyReferer=https:%2F%2Fwww.google.com%2F
@@ -81,13 +90,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return isClear
     }
 
-    private fun requestPermissions(){
+    private fun requestPermissions():Boolean{
         //거절된 퍼미션이 있다면...
         if(rejectedPermissionList.isNotEmpty()){
             //권한 요청!
             val array = arrayOfNulls<String>(rejectedPermissionList.size)
             ActivityCompat.requestPermissions(this, rejectedPermissionList.toArray(array), multiplePermissionsCode)
         }
+        return checkPermissions()
     }
 
     fun refreshMap(){
@@ -203,8 +213,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 //db에 저장하기
             }
         }
-
-
         return true
     }
 }
