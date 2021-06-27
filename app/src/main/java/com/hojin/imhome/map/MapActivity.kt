@@ -3,6 +3,7 @@ package com.hojin.imhome.map
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
@@ -18,9 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.hojin.imhome.R
 import com.hojin.imhome.util.util
 import kotlinx.android.synthetic.main.activity_map.*
@@ -63,7 +62,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         if(settingPermission()){
             refreshMap()
             UIIntraction()
-
+            drawAreas()
         }
     }
 
@@ -184,6 +183,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
+        val dbHelper = Map_DBHelper(this)
+        if(dbHelper.checkArea(mlatitude,mlongitude))    // 이미 저장된 좌표이면 dialog발생 안하게하기
+            return true
+
+
         val dialogview: View = layoutInflater.inflate(R.layout.dialog_add_area,null)
 
         dialogview.map_dialog_address.setText(mname)
@@ -209,21 +213,48 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             } else if(dialogview.map_dialog_radius.text.toString().toInt()>5000||dialogview.map_dialog_radius.text.toString().toDouble()<0){
                 Toast.makeText(applicationContext,"반경에는 0 ~ 5000의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
             } else{
-                val map:Map = Map()
-                map.setName(dialogview.map_dialog_name.text.toString())
-                map.setAddress(dialogview.map_dialog_address.text.toString())
-                map.setLatitude(dialogview.map_dialog_latitude.text.toString())
-                map.setLongitude(dialogview.map_dialog_longitude.text.toString())
-                map.setRadius(dialogview.map_dialog_radius.text.toString())
+                val area: AREA = AREA()
+                area.setName(dialogview.map_dialog_name.text.toString())
+                area.setAddress(dialogview.map_dialog_address.text.toString())
+                area.setLatitude(dialogview.map_dialog_latitude.text.toString())
+                area.setLongitude(dialogview.map_dialog_longitude.text.toString())
+                area.setRadius(dialogview.map_dialog_radius.text.toString())
 
-                val dbHelper = Map_DBHelper(this)
-                dbHelper.insertAREALIST(map)
+                dbHelper.insertAREALIST(area)
+
+                drawAreas()
 
                 Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
         }
         return true
+    }
+
+    fun drawAreas(){
+        val dbHelper = Map_DBHelper(this)
+        val locations = dbHelper.getAREALIST()
+        var area:AREA
+        for(i in 0 until locations.size){
+            Log.d("@@@@@",i.toString())
+            area = locations.get(i)
+            val circleOptions = CircleOptions()
+                .center(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
+                .clickable(false)
+                .radius(area.getRadius().toDouble())
+                .fillColor(Color.argb(100, 200, 200, 200))
+                .strokeColor(Color.RED)
+                .strokeWidth(2F)
+            val markerOptions = MarkerOptions()
+                .title(area.getName())
+                .draggable(false)
+                .position(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
+                .snippet(area.getAddress())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+
+            mMap.addMarker(markerOptions)
+            mMap.addCircle(circleOptions)
+        }
     }
 }
 

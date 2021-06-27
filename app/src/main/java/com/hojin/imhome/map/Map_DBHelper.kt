@@ -41,45 +41,64 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         onCreate(db)
     }
 
-    fun insertAREALIST(map:Map) {
+    fun insertAREALIST(area:AREA) {
         val db = this.writableDatabase
         val contentValues = ContentValues()
-        contentValues.put(AREA_NAME,map.getName())
-        contentValues.put(AREA_ADDRESS,map.getAddress())
-        contentValues.put(AREA_LATITUDE,map.getLatitude())
-        contentValues.put(AREA_LONGITUDE,map.getLongitude())
-        contentValues.put(AREA_RADIUS,map.getRadius())
+        contentValues.put(AREA_NAME,area.getName())
+        contentValues.put(AREA_ADDRESS,area.getAddress())
+        contentValues.put(AREA_LATITUDE,area.getLatitude())
+        contentValues.put(AREA_LONGITUDE,area.getLongitude())
+        contentValues.put(AREA_RADIUS,area.getRadius())
         db.insert(AREALIST, null, contentValues)
         db.close()
     }
 
-    fun getAREALIST():MutableList<Map> {
+    fun getAREALIST():ArrayList<AREA> {
         val db = this.readableDatabase
-        val maplist = mutableListOf<Map>()
-        var map:Map
+        val arealist = ArrayList<AREA>()
+        var area:AREA
         val cursor = db.rawQuery("SELECT * FROM $AREALIST",null)
         while(cursor.moveToNext()){
-            map = Map()
-            map.setName(cursor.getString(cursor.getColumnIndex(AREA_NAME)))
-            map.setAddress(cursor.getString(cursor.getColumnIndex(AREA_ADDRESS)))
-            map.setLatitude(cursor.getString(cursor.getColumnIndex(AREA_LATITUDE)))
-            map.setLongitude(cursor.getString(cursor.getColumnIndex(AREA_LONGITUDE)))
-            map.setRadius(cursor.getString(cursor.getColumnIndex(AREA_RADIUS)))
-            maplist.add(map)
+            area = AREA()
+            area.setName(cursor.getString(cursor.getColumnIndex(AREA_NAME)))
+            area.setAddress(cursor.getString(cursor.getColumnIndex(AREA_ADDRESS)))
+            area.setLatitude(cursor.getString(cursor.getColumnIndex(AREA_LATITUDE)))
+            area.setLongitude(cursor.getString(cursor.getColumnIndex(AREA_LONGITUDE)))
+            area.setRadius(cursor.getString(cursor.getColumnIndex(AREA_RADIUS)))
+            arealist.add(area)
         }
         cursor.close()
         db.close()
-        return maplist
+        return arealist
     }
 
-    fun updateAREA(map:Map,latitude:Double,longitude:Double){
+    fun updateAREA(area:AREA,latitude:Double,longitude:Double){
         val db = this.writableDatabase
         val contentValues = ContentValues()
-        contentValues.put(AREA_NAME,map.getName())
-        contentValues.put(AREA_ADDRESS,map.getAddress())
-        contentValues.put(AREA_LATITUDE,map.getLatitude())
-        contentValues.put(AREA_LONGITUDE,map.getLongitude())
-        contentValues.put(AREA_RADIUS,map.getRadius())
+        contentValues.put(AREA_NAME,area.getName())
+        contentValues.put(AREA_ADDRESS,area.getAddress())
+        contentValues.put(AREA_LATITUDE,area.getLatitude())
+        contentValues.put(AREA_LONGITUDE,area.getLongitude())
+        contentValues.put(AREA_RADIUS,area.getRadius())
         db.update(AREALIST, contentValues,"$AREA_LATITUDE = $latitude AND $AREA_LONGITUDE = $longitude",null)
+    }
+
+    fun checkArea(latitude: Double,longitude: Double):Boolean{
+        val db = this.readableDatabase
+        var isExist:Boolean = false
+
+        val cursor = db.rawQuery("SELECT * FROM $AREALIST",null)
+        while (cursor.moveToNext()){
+            if(latitude.toString() == cursor.getString(cursor.getColumnIndex(AREA_LATITUDE))
+                && longitude.toString() == cursor.getString(cursor.getColumnIndex(AREA_LONGITUDE))){
+                isExist = true
+                cursor.close()
+                db.close()
+                return isExist
+            }
+        }
+        cursor.close()
+        db.close()
+        return isExist
     }
 }
