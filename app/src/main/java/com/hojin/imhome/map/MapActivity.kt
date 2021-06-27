@@ -63,6 +63,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         if(settingPermission()){
             refreshMap()
             UIIntraction()
+
         }
     }
 
@@ -208,9 +209,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             } else if(dialogview.map_dialog_radius.text.toString().toInt()>5000||dialogview.map_dialog_radius.text.toString().toDouble()<0){
                 Toast.makeText(applicationContext,"반경에는 0 ~ 5000의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
             } else{
-                Toast.makeText(applicationContext,"add!",Toast.LENGTH_SHORT).show()
+                val map:Map = Map()
+                map.setName(dialogview.map_dialog_name.text.toString())
+                map.setAddress(dialogview.map_dialog_address.text.toString())
+                map.setLatitude(dialogview.map_dialog_latitude.text.toString())
+                map.setLongitude(dialogview.map_dialog_longitude.text.toString())
+                map.setRadius(dialogview.map_dialog_radius.text.toString())
+
+                val dbHelper = Map_DBHelper(this)
+                dbHelper.insertAREALIST(map)
+
+                Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
-                //db에 저장하기
             }
         }
         return true
