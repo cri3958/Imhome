@@ -2,7 +2,9 @@ package com.hojin.imhome.map
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
@@ -18,9 +20,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
+import com.hojin.imhome.MainActivity
 import com.hojin.imhome.R
 import com.hojin.imhome.util.util
 import kotlinx.android.synthetic.main.activity_map.*
@@ -31,7 +32,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private val multiplePermissionsCode = 100
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
     var rejectedPermissionList = ArrayList<String>()
 
@@ -51,6 +53,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        settingPermission()
     }
 
     override fun onMapReady(gMap: GoogleMap) {
@@ -58,14 +61,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         mMap.setOnMarkerClickListener(this)
-        settingPermission()
-        refreshMap()
-        UIIntraction()
+        if(settingPermission()){
+            refreshMap()
+            UIIntraction()
+            drawAreas()
+        }
     }
 
-    fun settingPermission(){
-        checkPermissions()
-        requestPermissions()
+    private fun settingPermission():Boolean{
+        return if(checkPermissions())
+            true
+        else {
+            if (requestPermissions())
+                true
+            else
+                settingPermission()
+        }
     }
 
     private fun checkPermissions():Boolean {//https://m.blog.naver.com/PostView.naver?blogId=chandong83&logNo=221616557088&proxyReferer=https:%2F%2Fwww.google.com%2F
@@ -81,13 +92,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return isClear
     }
 
-    private fun requestPermissions(){
+    private fun requestPermissions():Boolean{
         //거절된 퍼미션이 있다면...
         if(rejectedPermissionList.isNotEmpty()){
             //권한 요청!
             val array = arrayOfNulls<String>(rejectedPermissionList.size)
             ActivityCompat.requestPermissions(this, rejectedPermissionList.toArray(array), multiplePermissionsCode)
         }
+        return checkPermissions()
     }
 
     fun refreshMap(){
@@ -141,7 +153,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     fun UIIntraction(){
-        btn_refresh.setOnClickListener { refreshMap() }
+        map_btn_refresh.setOnClickListener { refreshMap() }
         map_search_btn.setOnClickListener {//검색버튼
             val geocoder = Geocoder(this)
             val addressname = map_search_text.text.toString()
@@ -170,9 +182,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             util.keyboard_down(applicationContext,map_search_text)
             map_search_text.text=null
         }
+        map_btn_back_map.setOnClickListener {
+            val intent = Intent(this,MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+        map_btn_view_list.setOnClickListener {
+            val intent = Intent(this,ListActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
+        val dbHelper = Map_DBHelper(this)
+        if(dbHelper.checkArea(mlatitude,mlongitude))    // 이미 저장된 좌표이면 dialog발생 안하게하기
+            return true
+
+
         val dialogview: View = layoutInflater.inflate(R.layout.dialog_add_area,null)
 
         dialogview.map_dialog_address.setText(mname)
@@ -198,14 +225,47 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             } else if(dialogview.map_dialog_radius.text.toString().toInt()>5000||dialogview.map_dialog_radius.text.toString().toDouble()<0){
                 Toast.makeText(applicationContext,"반경에는 0 ~ 5000의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
             } else{
-                Toast.makeText(applicationContext,"add!",Toast.LENGTH_SHORT).show()
+                val area: AREA = AREA()
+                area.setName(dialogview.map_dialog_name.text.toString())
+                area.setAddress(dialogview.map_dialog_address.text.toString())
+                area.setLatitude(dialogview.map_dialog_latitude.text.toString())
+                area.setLongitude(dialogview.map_dialog_longitude.text.toString())
+                area.setRadius(dialogview.map_dialog_radius.text.toString())
+
+                dbHelper.insertAREALIST(area)
+
+                drawAreas()
+
+                Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
-                //db에 저장하기
             }
         }
-
-
         return true
+    }
+
+    fun drawAreas(){
+        val dbHelper = Map_DBHelper(this)
+        val locations = dbHelper.getAREALIST()
+        var area:AREA
+        for(i in 0 until locations.size){
+            area = locations.get(i)
+            val circleOptions = CircleOptions()
+                .center(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
+                .clickable(false)
+                .radius(area.getRadius().toDouble())
+                .fillColor(Color.argb(100, 200, 200, 200))
+                .strokeColor(Color.RED)
+                .strokeWidth(2F)
+            val markerOptions = MarkerOptions()
+                .title(area.getName())
+                .draggable(false)
+                .position(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
+                .snippet(area.getAddress())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+
+            mMap.addMarker(markerOptions)
+            mMap.addCircle(circleOptions)
+        }
     }
 }
 
