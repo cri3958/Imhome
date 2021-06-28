@@ -8,13 +8,42 @@
     android:id="@+id/map_layout">
 
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/map_toolbar_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_underline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:padding="3dp">
+
+
+        <ImageView
+            android:id="@+id/map_btn_back_map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/btn_back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="10dp"/>
+
+        <ImageView
+            android:id="@+id/map_btn_view_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/btn_list"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="10dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
         android:id="@+id/map_search_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/map_toolbar_map"
         app:layout_constraintStart_toStartOf="parent">
 
         <EditText
@@ -44,7 +73,7 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <ImageView
-        android:id="@+id/btn_refresh"
+        android:id="@+id/map_btn_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/btn_refresh"

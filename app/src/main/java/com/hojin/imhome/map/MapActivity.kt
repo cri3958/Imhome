@@ -2,6 +2,7 @@ package com.hojin.imhome.map
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Geocoder
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.hojin.imhome.MainActivity
 import com.hojin.imhome.R
 import com.hojin.imhome.util.util
 import kotlinx.android.synthetic.main.activity_map.*
@@ -151,7 +153,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     fun UIIntraction(){
-        btn_refresh.setOnClickListener { refreshMap() }
+        map_btn_refresh.setOnClickListener { refreshMap() }
         map_search_btn.setOnClickListener {//검색버튼
             val geocoder = Geocoder(this)
             val addressname = map_search_text.text.toString()
@@ -179,6 +181,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
             util.keyboard_down(applicationContext,map_search_text)
             map_search_text.text=null
+        }
+        map_btn_back_map.setOnClickListener {
+            val intent = Intent(this,MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+        map_btn_view_list.setOnClickListener {
+            val intent = Intent(this,ListActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 
@@ -236,7 +248,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         val locations = dbHelper.getAREALIST()
         var area:AREA
         for(i in 0 until locations.size){
-            Log.d("@@@@@",i.toString())
             area = locations.get(i)
             val circleOptions = CircleOptions()
                 .center(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
