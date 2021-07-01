@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -18,7 +18,8 @@
             android:ems="4"
             android:text="@string/dialog_area_name"
             android:textStyle="bold"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
 
         <EditText
             android:id="@+id/map_dialog_name"
@@ -41,7 +42,8 @@
             android:ems="4"
             android:text="@string/dialog_area_address"
             android:textStyle="bold"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
 
         <EditText
             android:id="@+id/map_dialog_address"
@@ -64,7 +66,8 @@
             android:ems="4"
             android:text="@string/dialog_area_latitude"
             android:textStyle="bold"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
 
         <EditText
             android:id="@+id/map_dialog_latitude"
@@ -86,7 +89,8 @@
             android:ems="4"
             android:text="@string/dialog_area_longitude"
             android:textStyle="bold"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
 
         <EditText
             android:id="@+id/map_dialog_longitude"
@@ -108,7 +112,8 @@
             android:ems="4"
             android:text="@string/dialog_area_radius"
             android:textStyle="bold"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:textColor="@color/black"/>
 
         <EditText
             android:id="@+id/map_dialog_radius"
@@ -118,5 +123,159 @@
             android:ems="14"
             android:inputType="textPersonName"
             android:text="200"/>
+    </LinearLayout>
+
+    <Switch
+        android:id="@+id/map_dialog_switch_enter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:text="@string/dialog_area_enter"
+        android:textSize="22dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+
+    <LinearLayout
+        android:id="@+id/map_dialog_switch_enter_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <Switch
+            android:id="@+id/map_dialog_switch_enter_wifi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/dialog_area_wifi"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/map_dialog_switch_enter_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/dialog_area_data"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <RadioGroup
+            android:id="@+id/map_dialog_radio_enter_group"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound"
+                android:textSize="15dp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+            <RadioButton
+                android:id="@+id/map_dialog_radio_enter_silence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound_silence"
+                android:textColor="@color/black"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/map_dialog_radio_enter_vibrate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound_vibrate"
+                android:textColor="@color/black" />
+            <RadioButton
+                android:id="@+id/map_dialog_radio_enter_sound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound_sound"
+                android:textColor="@color/black" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <Switch
+        android:id="@+id/map_dialog_switch_exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:text="@string/dialog_area_exit"
+        android:textSize="22dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+
+    <LinearLayout
+        android:id="@+id/map_dialog_switch_exit_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <Switch
+            android:id="@+id/map_dialog_switch_exit_wifi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/dialog_area_wifi"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/map_dialog_switch_exit_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/dialog_area_data"
+            android:textColor="@color/black"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/map_dialog_radio_exit_group"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound"
+                android:textColor="@color/black"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/map_dialog_radio_exit_silence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/dialog_area_sound_silence"
+                android:textColor="@color/black" />
+
+            <RadioButton
+                android:id="@+id/map_dialog_radio_exit_vibrate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound_vibrate"
+                android:textColor="@color/black" />
+
+            <RadioButton
+                android:id="@+id/map_dialog_radio_exit_sound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_area_sound_sound"
+                android:textColor="@color/black" />
+        </RadioGroup>
     </LinearLayout>
 </LinearLayout>

@@ -6,4 +6,12 @@
     <string name="dialog_area_latitude">위도 :\t</string>
     <string name="dialog_area_longitude">경도 :\t</string>
     <string name="dialog_area_radius">반경(m) :\t</string>
+    <string name="dialog_area_enter">지역 진입시 사용할 기능\t</string>\
+    <string name="dialog_area_exit">지역 이탈시 사용할 기능\t</string>
+    <string name="dialog_area_wifi">WIFI OFF / ON\t</string>
+    <string name="dialog_area_data">데이터 OFF / ON\t</string>
+    <string name="dialog_area_sound">소리 설정\t</string>
+    <string name="dialog_area_sound_silence">무음\t</string>
+    <string name="dialog_area_sound_vibrate">진동\t</string>
+    <string name="dialog_area_sound_sound">소리\t</string>
 </resources>

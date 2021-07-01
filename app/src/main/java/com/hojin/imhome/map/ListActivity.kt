@@ -1,5 +1,7 @@
 package com.hojin.imhome.map
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.hojin.imhome.MainActivity
@@ -12,7 +14,7 @@ class ListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_list)
 
         UIInteraction()
-        setAdapter(context)
+        setAdapter(this)
     }
     fun UIInteraction(){
         map_btn_back_list.setOnClickListener {
@@ -26,7 +28,7 @@ class ListActivity : AppCompatActivity() {
             finish()
         }
     }
-    fun setAdapter(context){
+    fun setAdapter(context: Context){
         val dbHelper = Map_DBHelper(context)
 
     }
