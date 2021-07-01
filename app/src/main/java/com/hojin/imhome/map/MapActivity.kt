@@ -205,6 +205,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         dialogview.map_dialog_address.setText(mname)
         dialogview.map_dialog_latitude.setText(mlatitude.toString())
         dialogview.map_dialog_longitude.setText(mlongitude.toString())
+        dialogview.map_dialog_switch_enter.setOnCheckedChangeListener { _, isCheckeed ->
+            if(isCheckeed)
+                dialogview.map_dialog_switch_enter_layout.visibility = View.VISIBLE
+            else
+                dialogview.map_dialog_switch_enter_layout.visibility = View.GONE
+        }
+        dialogview.map_dialog_switch_exit.setOnCheckedChangeListener { _, isCheckeed ->
+            if(isCheckeed)
+                dialogview.map_dialog_switch_exit_layout.visibility = View.VISIBLE
+            else
+                dialogview.map_dialog_switch_exit_layout.visibility = View.GONE
+        }
+
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("새로운 지역을 만드시겠습니까?")
