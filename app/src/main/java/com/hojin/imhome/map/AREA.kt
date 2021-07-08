@@ -6,9 +6,11 @@ class AREA {
     private lateinit var AREA_Latitude:String
     private lateinit var AREA_Longitude:String
     private lateinit var AREA_Radius:String
+    private lateinit var AREA_Enter:String
     private lateinit var AREA_Enter_wifi:String
     private lateinit var AREA_Enter_data:String
     private lateinit var AREA_Enter_sound:String
+    private lateinit var AREA_Exit:String
     private lateinit var AREA_Exit_wifi:String
     private lateinit var AREA_Exit_data:String
     private lateinit var AREA_Exit_sound:String
@@ -37,7 +39,10 @@ class AREA {
 
     fun getRadius():String{return AREA_Radius}
     fun setRadius(text:String){this.AREA_Radius = text}
-    
+
+    fun getEnter():String{return AREA_Enter}
+    fun setEnter(text:String){this.AREA_Enter = text}
+
     fun getEnwifi():String{return AREA_Enter_wifi}
     fun setEnwifi(text:String){this.AREA_Enter_wifi = text}
 
@@ -46,6 +51,9 @@ class AREA {
 
     fun getEnsound():String{return AREA_Enter_sound}
     fun setEnsound(text:String){this.AREA_Enter_sound = text}
+
+    fun getExit():String{return AREA_Exit}
+    fun setExit(text:String){this.AREA_Exit = text}
 
     fun getExwifi():String{return AREA_Exit_wifi}
     fun setExwifi(text:String){this.AREA_Exit_wifi = text}
