@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +20,7 @@ class ListActivity : AppCompatActivity() {
         UIInteraction()
         setAdapter(this)
     }
-    fun UIInteraction(){
+    private fun UIInteraction(){
         map_btn_back_list.setOnClickListener {
             val intent = Intent(this,MainActivity::class.java)
             startActivity(intent)
@@ -33,7 +32,7 @@ class ListActivity : AppCompatActivity() {
             finish()
         }
     }
-    fun setAdapter(context: Context){
+    private fun setAdapter(context: Context){
         val dbHelper = Map_DBHelper(context)
         val adapter = ListActivityAdapter()
 
