@@ -30,8 +30,8 @@ class ListActivityAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val area = listData[position]
         holder.itemView.item_name.text = area.getName()
-        holder.itemView.item_latitude.text = area.getLatitude()
-        holder.itemView.item_longitude.text = area.getLongitude()
+        holder.itemView.item_latitude.text = "%.4f".format(area.getLatitude().toDouble())
+        holder.itemView.item_longitude.text = "%.4f".format(area.getLongitude().toDouble())
         
         if(area.getEnter()=="true")
             holder.itemView.item_enter.visibility = View.VISIBLE
@@ -47,11 +47,9 @@ class ListActivityAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         else
             holder.itemView.item_enter_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
 
-        if(area.getEnsound()=="false"){
-            holder.itemView.item_enter_function_data.text = ""
-        }else{
-            holder.itemView.item_enter_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
-            holder.itemView.item_enter_function_data.text = area.getEnsound()
+        if(area.getEnsound()!="false"){
+            holder.itemView.item_enter_function_sound.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+            holder.itemView.item_enter_function_sound.text = area.getEnsound()
         }
 
         if(area.getExit()=="true")
@@ -68,11 +66,9 @@ class ListActivityAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         else
             holder.itemView.item_exit_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
 
-        if(area.getExsound()=="false"){
-            holder.itemView.item_exit_function_data.text = ""
-        }else{
-            holder.itemView.item_exit_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
-            holder.itemView.item_exit_function_data.text = area.getExsound()
+        if(area.getExsound()!="false"){
+            holder.itemView.item_exit_function_sound.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+            holder.itemView.item_exit_function_sound.text = area.getExsound()
         }
 
 

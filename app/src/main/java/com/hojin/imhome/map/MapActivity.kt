@@ -36,7 +36,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
-    var rejectedPermissionList = ArrayList<String>()
+    private var rejectedPermissionList = ArrayList<String>()
 
     private lateinit var mMap: GoogleMap
     private lateinit var locationManager:LocationManager
@@ -46,7 +46,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private var mlatitude:Double = 0.0
     private var mlongitude:Double = 0.0
 
-    val util:util = util()
+    private val util:util = util()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +103,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return checkPermissions()
     }
 
-    fun refreshMap(){
+    private fun refreshMap(){
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val mylocation = getLocation()
 
@@ -120,13 +120,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
     }
 
-    fun getLocation() : String {
+    private fun getLocation() : String {
         var temp: Location? = null
         var bestLocation: Location? = null
         val providers: List<String> = locationManager.getProviders(true)
 
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions(this, requiredPermissions, 100);
+            ActivityCompat.requestPermissions(this, requiredPermissions, 100)
         }else{
             val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
             val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
@@ -136,7 +136,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                     if (temp == null)
                         continue
                     if (bestLocation == null || temp.accuracy < bestLocation.accuracy) {
-                        bestLocation = temp;
+                        bestLocation = temp
                     }
                     temp = bestLocation
                 }
@@ -153,7 +153,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return location
     }
 
-    fun UIIntraction(){
+    private fun UIIntraction(){
         map_btn_refresh.setOnClickListener { refreshMap() }
         map_search_btn.setOnClickListener {//검색버튼
             val geocoder = Geocoder(this)
@@ -301,12 +301,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return true
     }
 
-    fun drawAreas(){
+    private fun drawAreas(){
         val dbHelper = Map_DBHelper(this)
         val locations = dbHelper.getAREALIST()
         var area:AREA
         for(i in 0 until locations.size){
-            area = locations.get(i)
+            area = locations[i]
             val circleOptions = CircleOptions()
                 .center(LatLng(area.getLatitude().toDouble(),area.getLongitude().toDouble()))
                 .clickable(false)
