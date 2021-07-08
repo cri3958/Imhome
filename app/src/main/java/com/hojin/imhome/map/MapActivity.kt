@@ -25,6 +25,7 @@ import com.hojin.imhome.MainActivity
 import com.hojin.imhome.R
 import com.hojin.imhome.util.util
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.dialog_add_area.*
 import kotlinx.android.synthetic.main.dialog_add_area.view.*
 import java.util.*
 
@@ -244,6 +245,50 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 area.setLatitude(dialogview.map_dialog_latitude.text.toString())
                 area.setLongitude(dialogview.map_dialog_longitude.text.toString())
                 area.setRadius(dialogview.map_dialog_radius.text.toString())
+
+                area.setEnter(dialogview.map_dialog_switch_enter.isChecked.toString())
+                area.setEnwifi(dialogview.map_dialog_switch_enter_wifi.isChecked.toString())
+                area.setEndata(dialogview.map_dialog_switch_enter_data.isChecked.toString())
+                if(dialogview.map_dialog_switch_enter.isChecked) {
+                    area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
+                    dialogview.map_dialog_radio_enter_group.setOnCheckedChangeListener { radioGroup, i ->
+                        when (i) {
+                            R.id.map_dialog_radio_enter_silence -> {
+                                area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
+                            }
+                            R.id.map_dialog_radio_enter_vibrate -> {
+                                area.setEnsound(dialogview.map_dialog_radio_enter_vibrate.text.toString())
+                            }
+                            R.id.map_dialog_radio_enter_sound -> {
+                                area.setEnsound(dialogview.map_dialog_radio_enter_sound.text.toString())
+                            }
+                        }
+                    }
+                }else {
+                    area.setEnsound("false")
+                }
+
+                area.setExit(dialogview.map_dialog_switch_exit.isChecked.toString())
+                area.setExwifi(dialogview.map_dialog_switch_exit_wifi.isChecked.toString())
+                area.setExdata(dialogview.map_dialog_switch_exit_data.isChecked.toString())
+                if(dialogview.map_dialog_switch_exit.isChecked) {
+                    area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
+                    dialogview.map_dialog_radio_exit_group.setOnCheckedChangeListener { radioGroup, i ->
+                        when (i) {
+                            R.id.map_dialog_radio_exit_silence -> {
+                                area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
+                            }
+                            R.id.map_dialog_radio_exit_vibrate -> {
+                                area.setExsound(dialogview.map_dialog_radio_exit_vibrate.text.toString())
+                            }
+                            R.id.map_dialog_radio_exit_sound -> {
+                                area.setExsound(dialogview.map_dialog_radio_exit_sound.text.toString())
+                            }
+                        }
+                    }
+                }else{
+                    area.setExsound("false")
+                }
 
                 dbHelper.insertAREALIST(area)
 

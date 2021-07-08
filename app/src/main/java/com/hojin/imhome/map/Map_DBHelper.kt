@@ -17,9 +17,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         private val AREA_LATITUDE = "Latitude"
         private val AREA_LONGITUDE = "Longitude"
         private val AREA_RADIUS = "Radius"
+        private val AREA_ENTER = "Enter"
         private val AREA_ENTER_WIFI = "EnWifi"
         private val AREA_ENTER_DATA = "EnData"
         private val AREA_ENTER_SOUND = "EnSound"
+        private val AREA_EXIT = "Exit"
         private val AREA_EXIT_WIFI = "ExWifi"
         private val AREA_EXIT_DATA = "ExData"
         private val AREA_EXIT_SOUND = "ExSound"
@@ -35,9 +37,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
                     + AREA_LATITUDE + " TEXT,"
                     + AREA_LONGITUDE + " TEXT,"
                     + AREA_RADIUS + " TEXT,"
+                    + AREA_ENTER + " TEXT,"
                     + AREA_ENTER_WIFI + " TEXT,"
                     + AREA_ENTER_DATA + " TEXT,"
                     + AREA_ENTER_SOUND + " TEXT,"
+                    + AREA_EXIT + " TEXT,"
                     + AREA_EXIT_WIFI + " TEXT,"
                     + AREA_EXIT_DATA + " TEXT,"
                     + AREA_EXIT_SOUND + " TEXT)")
@@ -61,9 +65,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         contentValues.put(AREA_LATITUDE,area.getLatitude())
         contentValues.put(AREA_LONGITUDE,area.getLongitude())
         contentValues.put(AREA_RADIUS,area.getRadius())
+        contentValues.put(AREA_ENTER,area.getEnter())
         contentValues.put(AREA_ENTER_WIFI,area.getEnwifi())
         contentValues.put(AREA_ENTER_DATA,area.getEndata())
         contentValues.put(AREA_ENTER_SOUND,area.getEnsound())
+        contentValues.put(AREA_EXIT,area.getExit())
         contentValues.put(AREA_EXIT_WIFI,area.getExwifi())
         contentValues.put(AREA_EXIT_DATA,area.getExdata())
         contentValues.put(AREA_EXIT_SOUND,area.getExsound())
@@ -83,9 +89,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
             area.setLatitude(cursor.getString(cursor.getColumnIndex(AREA_LATITUDE)))
             area.setLongitude(cursor.getString(cursor.getColumnIndex(AREA_LONGITUDE)))
             area.setRadius(cursor.getString(cursor.getColumnIndex(AREA_RADIUS)))
+            area.setEnter(cursor.getString(cursor.getColumnIndex(AREA_ENTER)))
             area.setEnwifi(cursor.getString(cursor.getColumnIndex(AREA_ENTER_WIFI)))
             area.setEndata(cursor.getString(cursor.getColumnIndex(AREA_ENTER_DATA)))
             area.setEnsound(cursor.getString(cursor.getColumnIndex(AREA_ENTER_SOUND)))
+            area.setExit(cursor.getString(cursor.getColumnIndex(AREA_EXIT)))
             area.setExwifi(cursor.getString(cursor.getColumnIndex(AREA_EXIT_WIFI)))
             area.setExdata(cursor.getString(cursor.getColumnIndex(AREA_EXIT_DATA)))
             area.setExsound(cursor.getString(cursor.getColumnIndex(AREA_EXIT_SOUND)))
@@ -104,9 +112,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         contentValues.put(AREA_LATITUDE,area.getLatitude())
         contentValues.put(AREA_LONGITUDE,area.getLongitude())
         contentValues.put(AREA_RADIUS,area.getRadius())
+        contentValues.put(AREA_ENTER,area.getEnter())
         contentValues.put(AREA_ENTER_WIFI,area.getEnwifi())
         contentValues.put(AREA_ENTER_DATA,area.getEndata())
         contentValues.put(AREA_ENTER_SOUND,area.getEnsound())
+        contentValues.put(AREA_EXIT,area.getExit())
         contentValues.put(AREA_EXIT_WIFI,area.getExwifi())
         contentValues.put(AREA_EXIT_DATA,area.getExdata())
         contentValues.put(AREA_EXIT_SOUND,area.getExsound())
@@ -130,5 +140,11 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         cursor.close()
         db.close()
         return isExist
+    }
+
+    fun deleteArea(address:String){
+        val db = this.writableDatabase
+        db.delete(AREALIST,"$AREA_ADDRESS = ? ",arrayOf(address))
+        db.close()
     }
 }

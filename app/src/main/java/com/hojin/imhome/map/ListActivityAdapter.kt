@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.hojin.imhome.R
 import kotlinx.android.synthetic.main.item_maplist.view.*
@@ -31,6 +32,49 @@ class ListActivityAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         holder.itemView.item_name.text = area.getName()
         holder.itemView.item_latitude.text = area.getLatitude()
         holder.itemView.item_longitude.text = area.getLongitude()
+        
+        if(area.getEnter()=="true")
+            holder.itemView.item_enter.visibility = View.VISIBLE
+        else
+            holder.itemView.item_enter.visibility = View.GONE
+        if(area.getEnwifi()=="true")
+            holder.itemView.item_enter_function_wifi.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+        else
+            holder.itemView.item_enter_function_wifi.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
+
+        if(area.getEndata()=="true")
+            holder.itemView.item_enter_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+        else
+            holder.itemView.item_enter_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
+
+        if(area.getEnsound()=="false"){
+            holder.itemView.item_enter_function_data.text = ""
+        }else{
+            holder.itemView.item_enter_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+            holder.itemView.item_enter_function_data.text = area.getEnsound()
+        }
+
+        if(area.getExit()=="true")
+            holder.itemView.item_exit.visibility = View.VISIBLE
+        else
+            holder.itemView.item_exit.visibility = View.GONE
+        if(area.getExwifi()=="true")
+            holder.itemView.item_exit_function_wifi.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+        else
+            holder.itemView.item_exit_function_wifi.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
+
+        if(area.getExdata()=="true")
+            holder.itemView.item_exit_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+        else
+            holder.itemView.item_exit_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.red))
+
+        if(area.getExsound()=="false"){
+            holder.itemView.item_exit_function_data.text = ""
+        }else{
+            holder.itemView.item_exit_function_data.setTextColor(ContextCompat.getColor(mcontext!!, R.color.green))
+            holder.itemView.item_exit_function_data.text = area.getExsound()
+        }
+
 
     }
     class Holder(itemView: View) : RecyclerView.ViewHolder(itemView){}
