@@ -13,7 +13,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".map.ListActivity"></activity>
+        <receiver
+            android:name=".map.GeofenceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
+
+        <activity android:name=".map.ListActivity" />
 
         <receiver
             android:name=".map.GeofenceReceiver"
