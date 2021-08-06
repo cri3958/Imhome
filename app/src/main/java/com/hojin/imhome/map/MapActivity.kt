@@ -17,6 +17,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -39,6 +43,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     )
     private var rejectedPermissionList = ArrayList<String>()
 
+    private val dbHelper = Map_DBHelper(this)
+
     private lateinit var mMap: GoogleMap
     private lateinit var locationManager:LocationManager
     private lateinit var location:String
@@ -49,6 +55,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
     private val util:util = util()
 
+    lateinit var geofencingClient : GeofencingClient
+    private val geofenceList = ArrayList<Geofence>()
+
+    val REQUEST_ID_EXTRA = "geofenceRequestId"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
@@ -56,13 +67,76 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         settingPermission()
+    }
 
-        val geofencePendingIntent: PendingIntent by lazy {
-            val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
+    fun geofencing(area: AREA){
+        geofencingClient = LocationServices.getGeofencingClient(this)
 
-            PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val idCount = getPreferences(MODE_PRIVATE).getInt(REQUEST_ID_EXTRA,0)
+
+
+        geofenceList.add(Geofence.Builder()
+                //37.5548414,126.8573177 등촌역 기준
+            .setCircularRegion(area.getLatitude().toDouble(),area.getLongitude().toDouble(), area.getRadius().toFloat())
+            .setRequestId(REQUEST_ID_EXTRA+idCount)
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            .build()
+        )
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
+                addOnSuccessListener {
+                    Toast.makeText(applicationContext, "새로운 지역 생성", Toast.LENGTH_SHORT).show()
+                }
+                addOnFailureListener {
+                    Toast.makeText(applicationContext, "새로운 지역 생성 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            geofencingClient.removeGeofences(geofencePendingIntent).run {
+                addOnSuccessListener {
+                    Toast.makeText(applicationContext, "지역 삭제", Toast.LENGTH_SHORT).show()
+                }
+                addOnFailureListener {
+                    Toast.makeText(applicationContext, "지역 삭제 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            return
         }
 
+
+        val request = GeofencingRequest.Builder()
+            .addGeofences(geofenceList)
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            .build()
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            dbHelper.insertAREALIST(area)
+            geofencingClient.addGeofences(request,getPendingIntent())//geofence 추가코드
+            return
+        }
+    }
+
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(this, GeofenceReceiver::class.java)
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
+        // addGeofences() and removeGeofences().
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun getGeofencingRequest(): GeofencingRequest {
+        return GeofencingRequest.Builder().apply {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geofenceList)
+        }.build()
+    }
+
+    fun getPendingIntent():PendingIntent{
+        val intent = Intent(this,GeofenceReceiver::class.java)
+        return PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     override fun onMapReady(gMap: GoogleMap) {
@@ -204,7 +278,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        val dbHelper = Map_DBHelper(this)
         if(dbHelper.checkArea(mlatitude,mlongitude))    // 이미 저장된 좌표이면 dialog발생 안하게하기
             return true
 
@@ -298,8 +371,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                     area.setExsound("false")
                 }
 
-                dbHelper.insertAREALIST(area)
 
+                geofencing(area)
                 drawAreas()
 
                 Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
@@ -310,7 +383,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private fun drawAreas(){
-        val dbHelper = Map_DBHelper(this)
         val locations = dbHelper.getAREALIST()
         var area:AREA
         for(i in 0 until locations.size){
