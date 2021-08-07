@@ -1,6 +1,7 @@
 package com.hojin.imhome.map
 
 import android.Manifest
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -35,6 +36,8 @@ import kotlinx.android.synthetic.main.dialog_add_area.view.*
 import java.util.*
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+    private val TAG = MapActivity::class.java.simpleName
+
     private val multiplePermissionsCode = 100
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -67,6 +70,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         settingPermission()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+            Toast.makeText(this, "권한을 허용해주세요", Toast.LENGTH_LONG).show();
+            startActivity(Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+        }
     }
 
     fun geofencing(area: AREA){
@@ -83,6 +93,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
             .build()
         )
+        area.setRequestId(REQUEST_ID_EXTRA+idCount)
+        Log.d(TAG, "geofencing REQUEST_ID: ${REQUEST_ID_EXTRA+idCount}")
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
@@ -113,11 +125,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             .build()
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            dbHelper.insertAREALIST(area)
-            geofencingClient.addGeofences(request,getPendingIntent())//geofence 추가코드
-            return
-        }
+        dbHelper.insertAREALIST(area)
+        geofencingClient.addGeofences(request, getPendingIntent())//geofence 추가코드
+        return
+
     }
 
     private val geofencePendingIntent: PendingIntent by lazy {
@@ -340,7 +351,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                             R.id.map_dialog_radio_enter_vibrate -> {
                                 area.setEnsound(dialogview.map_dialog_radio_enter_vibrate.text.toString())
                             }
-                            R.id.map_dialog_radio_enter_sound -> {
+                            R.id.map_dialog_radio_enter_sound -> {//???시발? 왜 다 무음으로 저장됨?
                                 area.setEnsound(dialogview.map_dialog_radio_enter_sound.text.toString())
                             }
                         }
@@ -371,11 +382,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                     area.setExsound("false")
                 }
 
-
+                Log.d(TAG, "onMarkerClick: Complete")
                 geofencing(area)
                 drawAreas()
 
-                Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
+                //Toast.makeText(applicationContext,"새로운 지역이 추가되었습니다.",Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
         }

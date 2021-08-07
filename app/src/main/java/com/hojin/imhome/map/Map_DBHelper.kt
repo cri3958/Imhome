@@ -4,8 +4,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 
 class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
+    private val TAG = Map_DBHelper::class.java.simpleName
+
     companion object{
         private val DB_VERSION = 1
         private val DB_NAME = "ImHome.db"
@@ -25,6 +28,7 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         private val AREA_EXIT_WIFI = "ExWifi"
         private val AREA_EXIT_DATA = "ExData"
         private val AREA_EXIT_SOUND = "ExSound"
+        private val AREA_REQUESTID = "RequestID"
 
     }
 
@@ -44,7 +48,8 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
                     + AREA_EXIT + " TEXT,"
                     + AREA_EXIT_WIFI + " TEXT,"
                     + AREA_EXIT_DATA + " TEXT,"
-                    + AREA_EXIT_SOUND + " TEXT)")
+                    + AREA_EXIT_SOUND + " TEXT,"
+                    + AREA_REQUESTID + " TEXT)")
         db!!.execSQL(CREATE_TABLE_AREA)
     }
 
@@ -73,6 +78,7 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         contentValues.put(AREA_EXIT_WIFI,area.getExwifi())
         contentValues.put(AREA_EXIT_DATA,area.getExdata())
         contentValues.put(AREA_EXIT_SOUND,area.getExsound())
+        contentValues.put(AREA_REQUESTID,area.getRequestId())
         db.insert(AREALIST, null, contentValues)
         db.close()
     }
@@ -97,6 +103,7 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
             area.setExwifi(cursor.getString(cursor.getColumnIndex(AREA_EXIT_WIFI)))
             area.setExdata(cursor.getString(cursor.getColumnIndex(AREA_EXIT_DATA)))
             area.setExsound(cursor.getString(cursor.getColumnIndex(AREA_EXIT_SOUND)))
+            area.setRequestId(cursor.getString(cursor.getColumnIndex(AREA_REQUESTID)))
             arealist.add(area)
         }
         cursor.close()
@@ -120,6 +127,7 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         contentValues.put(AREA_EXIT_WIFI,area.getExwifi())
         contentValues.put(AREA_EXIT_DATA,area.getExdata())
         contentValues.put(AREA_EXIT_SOUND,area.getExsound())
+        contentValues.put(AREA_REQUESTID,area.getRequestId())
         db.update(AREALIST, contentValues,"$AREA_LATITUDE = $latitude AND $AREA_LONGITUDE = $longitude",null)
     }
 
@@ -146,5 +154,29 @@ class Map_DBHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null,
         val db = this.writableDatabase
         db.delete(AREALIST,"$AREA_ADDRESS = ? ",arrayOf(address))
         db.close()
+    }
+
+    fun findArea(requestId:String):AREA{
+        Log.d(TAG, "findArea: $requestId")
+        val db = this.readableDatabase
+        val area = AREA()
+        val cursor = db.rawQuery("SELECT * FROM $AREALIST WHERE $AREA_REQUESTID LIKE '$requestId'",null)
+        while(cursor.moveToNext()){
+            area.setName(cursor.getString(cursor.getColumnIndex(AREA_NAME)))
+            area.setAddress(cursor.getString(cursor.getColumnIndex(AREA_ADDRESS)))
+            area.setLatitude(cursor.getString(cursor.getColumnIndex(AREA_LATITUDE)))
+            area.setLongitude(cursor.getString(cursor.getColumnIndex(AREA_LONGITUDE)))
+            area.setRadius(cursor.getString(cursor.getColumnIndex(AREA_RADIUS)))
+            area.setEnter(cursor.getString(cursor.getColumnIndex(AREA_ENTER)))
+            area.setEnwifi(cursor.getString(cursor.getColumnIndex(AREA_ENTER_WIFI)))
+            area.setEndata(cursor.getString(cursor.getColumnIndex(AREA_ENTER_DATA)))
+            area.setEnsound(cursor.getString(cursor.getColumnIndex(AREA_ENTER_SOUND)))
+            area.setExit(cursor.getString(cursor.getColumnIndex(AREA_EXIT)))
+            area.setExwifi(cursor.getString(cursor.getColumnIndex(AREA_EXIT_WIFI)))
+            area.setExdata(cursor.getString(cursor.getColumnIndex(AREA_EXIT_DATA)))
+            area.setExsound(cursor.getString(cursor.getColumnIndex(AREA_EXIT_SOUND)))
+            area.setRequestId(cursor.getString(cursor.getColumnIndex(AREA_REQUESTID)))
+        }
+        return area
     }
 }
