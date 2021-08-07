@@ -14,6 +14,7 @@ class AREA {
     private lateinit var AREA_Exit_wifi:String
     private lateinit var AREA_Exit_data:String
     private lateinit var AREA_Exit_sound:String
+    private lateinit var AREA_RequestId:String
     
     
 
@@ -63,4 +64,7 @@ class AREA {
 
     fun getExsound():String{return AREA_Exit_sound}
     fun setExsound(text:String){this.AREA_Exit_sound = text}
+
+    fun getRequestId(): String { return AREA_RequestId}
+    fun setRequestId(text:String){this.AREA_RequestId=text}
 }

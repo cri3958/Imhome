@@ -1,17 +1,17 @@
 <resources>
     <string name="app_name">Imhome</string>
 
-    <string name="dialog_area_name">이름 :\t</string>
-    <string name="dialog_area_address">주소 :\t</string>
-    <string name="dialog_area_latitude">위도 :\t</string>
-    <string name="dialog_area_longitude">경도 :\t</string>
-    <string name="dialog_area_radius">반경(m) :\t</string>
-    <string name="dialog_area_enter">지역 진입시 사용할 기능\t</string>\
-    <string name="dialog_area_exit">지역 이탈시 사용할 기능\t</string>
-    <string name="dialog_area_wifi">WIFI OFF / ON\t</string>
-    <string name="dialog_area_data">데이터 OFF / ON\t</string>
-    <string name="dialog_area_sound">소리 설정\t</string>
-    <string name="dialog_area_sound_silence">무음\t</string>
-    <string name="dialog_area_sound_vibrate">진동\t</string>
-    <string name="dialog_area_sound_sound">소리\t</string>
+    <string name="dialog_area_name">이름 :</string>
+    <string name="dialog_area_address">주소 :</string>
+    <string name="dialog_area_latitude">위도 :</string>
+    <string name="dialog_area_longitude">경도 :</string>
+    <string name="dialog_area_radius">반경(m) :</string>
+    <string name="dialog_area_enter">지역 진입시 사용할 기능</string>\
+    <string name="dialog_area_exit">지역 이탈시 사용할 기능</string>
+    <string name="dialog_area_wifi">WIFI OFF / ON</string>
+    <string name="dialog_area_data">데이터 OFF / ON</string>
+    <string name="dialog_area_sound">소리 설정</string>
+    <string name="dialog_area_sound_silence">무음</string>
+    <string name="dialog_area_sound_vibrate">진동</string>
+    <string name="dialog_area_sound_sound">소리</string>
 </resources>
