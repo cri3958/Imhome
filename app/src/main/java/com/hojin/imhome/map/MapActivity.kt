@@ -38,15 +38,14 @@ import java.util.*
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private val TAG = MapActivity::class.java.simpleName
 
-    private val multiplePermissionsCode = 100
     private val requiredPermissions = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
-    private var rejectedPermissionList = ArrayList<String>()
 
     private val dbHelper = Map_DBHelper(this)
+    private val util:util = util()
 
     private lateinit var mMap: GoogleMap
     private lateinit var locationManager:LocationManager
@@ -56,7 +55,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     private var mlatitude:Double = 0.0
     private var mlongitude:Double = 0.0
 
-    private val util:util = util()
 
     lateinit var geofencingClient : GeofencingClient
     private val geofenceList = ArrayList<Geofence>()
@@ -69,17 +67,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        settingPermission()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (!notificationManager.isNotificationPolicyAccessGranted) {
-            Toast.makeText(this, "권한을 허용해주세요", Toast.LENGTH_LONG).show();
-            startActivity(Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-        }
+    }
+
+    override fun onMapReady(gMap: GoogleMap) {
+
+            mMap = gMap
+
+            mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+            mMap.setOnMarkerClickListener(this)
+
+            refreshMap()
+            UIIntraction()
+            drawAreas()
+
     }
 
     fun geofencing(area: AREA){
+        Log.d(TAG, "geofencing: ENTER!")
         geofencingClient = LocationServices.getGeofencingClient(this)
 
         val idCount = getPreferences(MODE_PRIVATE).getInt(REQUEST_ID_EXTRA,0)
@@ -132,6 +138,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
     }
 
     private val geofencePendingIntent: PendingIntent by lazy {
+        Log.d(TAG, "geofencePendingIntent : Add GeofenceReceiver")
         val intent = Intent(this, GeofenceReceiver::class.java)
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // addGeofences() and removeGeofences().
@@ -150,52 +157,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         return PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    override fun onMapReady(gMap: GoogleMap) {
-        mMap=gMap
-
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        mMap.setOnMarkerClickListener(this)
-        if(settingPermission()){
-            refreshMap()
-            UIIntraction()
-            drawAreas()
-        }
-    }
-
-    private fun settingPermission():Boolean{
-        return if(checkPermissions())
-            true
-        else {
-            if (requestPermissions())
-                true
-            else
-                settingPermission()
-        }
-    }
-
-    private fun checkPermissions():Boolean {//https://m.blog.naver.com/PostView.naver?blogId=chandong83&logNo=221616557088&proxyReferer=https:%2F%2Fwww.google.com%2F
-        //거절되었거나 아직 수락하지 않은 권한(퍼미션)을 저장할 문자열 배열 리스트
-        var isClear: Boolean = true//권한이 전부다 있음
-        //필요한 퍼미션들을 하나씩 끄집어내서 현재 권한을 받았는지 체크
-        for (permission in requiredPermissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                rejectedPermissionList.add(permission)
-                isClear = false
-            }
-        }
-        return isClear
-    }
-
-    private fun requestPermissions():Boolean{
-        //거절된 퍼미션이 있다면...
-        if(rejectedPermissionList.isNotEmpty()){
-            //권한 요청!
-            val array = arrayOfNulls<String>(rejectedPermissionList.size)
-            ActivityCompat.requestPermissions(this, rejectedPermissionList.toArray(array), multiplePermissionsCode)
-        }
-        return checkPermissions()
-    }
-
     private fun refreshMap(){
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val mylocation = getLocation()
@@ -209,8 +170,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         val markerOptions = MarkerOptions()
         markerOptions.position(position)
 
+        mMap.clear()
         mMap.addMarker(markerOptions)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
+        drawAreas()
     }
 
     private fun getLocation() : String {
@@ -238,7 +201,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)!!
             val latitude = temp!!.latitude
             val longitude = temp.longitude
-            val address = Geocoder(this, Locale.getDefault()).getFromLocation(latitude,longitude,1).toString().split("\u0022")[1]
+            val address = Geocoder(this, Locale.getDefault()).getFromLocation(latitude,longitude,10).toString().split("\u0022")[1]
             Log.d("@@@@",address)
 
             location= "${address}@${latitude}@${longitude}"
@@ -270,8 +233,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 
             markerOptions.position(position)
 
+            mMap.clear()
             mMap.addMarker(markerOptions)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15F))
+            drawAreas()
 
             util.keyboard_down(applicationContext,map_search_text)
             map_search_text.text=null
@@ -292,6 +257,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
         if(dbHelper.checkArea(mlatitude,mlongitude))    // 이미 저장된 좌표이면 dialog발생 안하게하기
             return true
 
+        val area: AREA = AREA()
 
         val dialogview: View = layoutInflater.inflate(R.layout.dialog_add_area,null)
 
@@ -309,6 +275,36 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 dialogview.map_dialog_switch_exit_layout.visibility = View.VISIBLE
             else
                 dialogview.map_dialog_switch_exit_layout.visibility = View.GONE
+        }
+
+        area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
+        dialogview.map_dialog_radio_enter_group.setOnCheckedChangeListener {  radioGroup, i ->
+            when (i) {
+                R.id.map_dialog_radio_enter_silence -> {
+                    area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
+                }
+                R.id.map_dialog_radio_enter_vibrate -> {
+                    area.setEnsound(dialogview.map_dialog_radio_enter_vibrate.text.toString())
+                }
+                R.id.map_dialog_radio_enter_sound -> {
+                    area.setEnsound(dialogview.map_dialog_radio_enter_sound.text.toString())
+                }
+            }
+        }
+
+        area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
+        dialogview.map_dialog_radio_exit_group.setOnCheckedChangeListener { radioGroup, i ->
+            when (i) {
+                R.id.map_dialog_radio_exit_silence -> {
+                    area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
+                }
+                R.id.map_dialog_radio_exit_vibrate -> {
+                    area.setExsound(dialogview.map_dialog_radio_exit_vibrate.text.toString())
+                }
+                R.id.map_dialog_radio_exit_sound -> {
+                    area.setExsound(dialogview.map_dialog_radio_exit_sound.text.toString())
+                }
+            }
         }
 
 
@@ -331,7 +327,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
             } else if(dialogview.map_dialog_radius.text.toString().toInt()>5000||dialogview.map_dialog_radius.text.toString().toDouble()<0){
                 Toast.makeText(applicationContext,"반경에는 0 ~ 5000의 값만 입력할 수 있습니다.",Toast.LENGTH_SHORT).show()
             } else{
-                val area: AREA = AREA()
                 area.setName(dialogview.map_dialog_name.text.toString())
                 area.setAddress(dialogview.map_dialog_address.text.toString())
                 area.setLatitude(dialogview.map_dialog_latitude.text.toString())
@@ -341,44 +336,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
                 area.setEnter(dialogview.map_dialog_switch_enter.isChecked.toString())
                 area.setEnwifi(dialogview.map_dialog_switch_enter_wifi.isChecked.toString())
                 area.setEndata(dialogview.map_dialog_switch_enter_data.isChecked.toString())
-                if(dialogview.map_dialog_switch_enter.isChecked) {
-                    area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
-                    dialogview.map_dialog_radio_enter_group.setOnCheckedChangeListener { radioGroup, i ->
-                        when (i) {
-                            R.id.map_dialog_radio_enter_silence -> {
-                                area.setEnsound(dialogview.map_dialog_radio_enter_silence.text.toString())
-                            }
-                            R.id.map_dialog_radio_enter_vibrate -> {
-                                area.setEnsound(dialogview.map_dialog_radio_enter_vibrate.text.toString())
-                            }
-                            R.id.map_dialog_radio_enter_sound -> {//???시발? 왜 다 무음으로 저장됨?
-                                area.setEnsound(dialogview.map_dialog_radio_enter_sound.text.toString())
-                            }
-                        }
-                    }
-                }else {
+
+                if(!dialogview.map_dialog_switch_enter.isChecked) {
                     area.setEnsound("false")
                 }
 
                 area.setExit(dialogview.map_dialog_switch_exit.isChecked.toString())
                 area.setExwifi(dialogview.map_dialog_switch_exit_wifi.isChecked.toString())
                 area.setExdata(dialogview.map_dialog_switch_exit_data.isChecked.toString())
-                if(dialogview.map_dialog_switch_exit.isChecked) {
-                    area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
-                    dialogview.map_dialog_radio_exit_group.setOnCheckedChangeListener { radioGroup, i ->
-                        when (i) {
-                            R.id.map_dialog_radio_exit_silence -> {
-                                area.setExsound(dialogview.map_dialog_radio_exit_silence.text.toString())
-                            }
-                            R.id.map_dialog_radio_exit_vibrate -> {
-                                area.setExsound(dialogview.map_dialog_radio_exit_vibrate.text.toString())
-                            }
-                            R.id.map_dialog_radio_exit_sound -> {
-                                area.setExsound(dialogview.map_dialog_radio_exit_sound.text.toString())
-                            }
-                        }
-                    }
-                }else{
+                if(!dialogview.map_dialog_switch_exit.isChecked) {
                     area.setExsound("false")
                 }
 

@@ -15,6 +15,7 @@ class GeofenceReceiver : BroadcastReceiver() {
     private val TAG = GeofenceReceiver::class.java.simpleName
     private lateinit var dbHelper : Map_DBHelper
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d(TAG, "onReceive: receive Event")
         dbHelper = Map_DBHelper(context)
 
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
