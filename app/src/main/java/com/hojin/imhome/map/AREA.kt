@@ -1,6 +1,9 @@
 package com.hojin.imhome.map
 
 class AREA {
+    /**
+     * 구조체
+     */
     private lateinit var AREA_Name:String
     private lateinit var AREA_Address:String
     private lateinit var AREA_Latitude:String
