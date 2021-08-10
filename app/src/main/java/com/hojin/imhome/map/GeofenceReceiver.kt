@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.net.wifi.WifiManager
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.Geofence
@@ -36,7 +37,8 @@ class GeofenceReceiver : BroadcastReceiver() {
             Toast.makeText(context,"${triggerarea.getName()}에 Enter",Toast.LENGTH_SHORT).show()
 
             if(triggerarea.getEnwifi() == "true"){
-                //와이파이 on
+                val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                wifiManager.isWifiEnabled
             }
             if(triggerarea.getEndata() == "true"){
                 //데이터 on
